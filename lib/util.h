@@ -34,15 +34,15 @@ void normalizaMatriz(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int siz
     }
 }
 
-void appendInt(int *vetor, int valor) {
-    vetor = (int *) realloc(vetor, sizeof(vetor) + 1);
-    vetor[sizeof(vetor)] = valor;
+void appendInt(int **vetor, int valor) {
+    *vetor = (int *) realloc(*vetor, sizeof(*vetor) + 1);
+    (*vetor)[sizeof(*vetor)] = valor;
 }
 
 int len(int *vetor) {
     int length = 0;
 
-    if (*vetor == NULL || *vetor == 0) {
+    if (vetor == NULL) {
         printf("vetor == NULL ou vetor == 0\n");
         return 0;
     }
@@ -50,11 +50,63 @@ int len(int *vetor) {
         return 0;
     }
 
-    for (int i = 0; vetor[i] != -1 || vetor[i] == NULL; i++) {
-        printf("vetor[%d]: %d\n", i, vetor[i]);
+    for (int i = 0; vetor[i] != -1 && vetor[i] != NULL; i++) {
         length++;
     }
     return length;
+}
+
+bool passouPelaPilha(int *pilha, int idVertice) {
+    if (pilha == NULL) {
+        return false;
+    }
+
+    for (int i = 0; i < len(pilha); i++) {
+        if (pilha[i] == idVertice) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void limpaVetor(int **vetor) 
+{
+    int vEmergente;
+
+    if (*vetor != NULL) {
+        free(*vetor);
+    }
+
+    vEmergente = *vetor[0];
+    appendInt(vetor, vEmergente);
+}
+
+void adicionaFilhosNaPilha(int **pilha, int *filhos) 
+{
+    if (filhos == NULL) {
+        return;
+    }
+
+    for (int i = 0; filhos[i] != -1; i++) {
+        if (passouPelaPilha(*pilha, filhos[i])) {
+            continue;
+        }
+        else {
+            appendInt(pilha, filhos[i]);
+        }
+    }
+}
+
+void adicionaNoPassaramPelaPilha(int **idsPassaramPelaPilha, int *filhos) 
+{
+    if (filhos == NULL) {
+        return;
+    }
+
+    for (int i = 0; filhos[i] != -1; i++) 
+    {
+        appendInt(idsPassaramPelaPilha, filhos[i]);
+    }
 }
 
 #endif

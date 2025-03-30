@@ -43,21 +43,64 @@ bool incluirVertice(int matriz[][TAMANHO_MAX_MATRIZ]) {
     return true;
 }
 
-int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergente, int vIncidente) {
-    int *caminhoIds = NULL;
-    int *pilha;
-    bool conituaFluxo = true;
+int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergente, int vIncidente) 
+{
+    int *caminhoIds = NULL, *idsPassaramPelaPilha, *filhosAux;
+    int *pilha, aux;
+    bool continuaFluxo = true;
 
-    if (vEmergente == vIncidente) {
+    if (vEmergente == vIncidente) 
+    {
         printf("Vértices de origem e destino são iguais.\n");
         return NULL;
     }
 
-    printf("1 ------------------\n");
     pilha = pilhaInicializar(NULL);
+    pilhaPush(&pilha, vEmergente);
 
-    printf("2 ------------------\n");
-    pilhaPush(pilha, vEmergente);
+    while(continuaFluxo) 
+    {
+        aux = pilhaPop(pilha);
+        if (aux == -1) 
+        {
+            printf("Pilha vazia.\n");
+            continuaFluxo = false;
+            break;
+        }
+
+        if (passouPelaPilha(pilha, aux)) 
+        {
+            continue;
+        }
+
+        if (aux == vIncidente) 
+        {
+            printf("Caminho encontrado!\n");
+            appendInt(&caminhoIds, aux);
+            continuaFluxo = false;
+            break;
+        }
+        else 
+        {
+            appendInt(&caminhoIds, aux);
+        }
+
+        filhosAux = buscaFilhos(grafo, aux);
+        if (len(filhosAux) == 0) 
+        {
+            // Caso o vértice não tenha filhos, chegamos ao fim desse caminho
+            limpaVetor(&filhosAux);
+            limpaVetor(&caminhoIds);
+            continue;
+        }
+        else
+        {
+            // Adiciona os filhos na pilha
+            adicionaFilhosNaPilha(&pilha, filhosAux);
+            adicionaNoPassaramPelaPilha(&idsPassaramPelaPilha, filhosAux);
+        }
+
+    }
 
     printf("3 ------------------\n");
     caminhoIds = buscaFilhos(grafo, vEmergente);

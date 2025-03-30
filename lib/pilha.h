@@ -26,18 +26,17 @@ bool pilhaEstaVazia(int *pilha) {
     return pilha == NULL || *pilha == NULL;
 }
 
-void pilhaPush(int *pilha, int novoVertice) {
-    int qtdVertices = len(pilha);
-    printf('\n%d', qtdVertices);
+void pilhaPush(int **pilha, int novoVertice) {
+    int qtdVertices = len(*pilha);
 
-    pilha = (int *) realloc(pilha, qtdVertices * sizeof(int) + 1);
-    pilha[qtdVertices] = novoVertice;
+    *pilha = (int *) realloc(*pilha, qtdVertices * sizeof(int) + 1);
+    (*pilha)[qtdVertices] = novoVertice;
 }
 
 int pilhaPop(int *pilha) {
     if (pilhaEstaVazia(pilha)) {
         printf("Erro: Pilha vazia.\n");
-        return NULL;
+        return -1;
     }
     int verticeExcluir = pilha[len(pilha) - 1];
 
@@ -49,13 +48,14 @@ int pilhaPop(int *pilha) {
 int imprimePilha(int *pilha) {
     if (pilhaEstaVazia(pilha)) {
         printf("Pilha vazia.\n");
-        return NULL;
+        return -1;
     }
 
     for (int i = 0; i < len(pilha); i++) {
         printf("V%d ", pilha[i]);
     }
     printf("\n");
+    return 0;
 }
 
 #endif
