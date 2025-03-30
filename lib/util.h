@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "structVertice.h"
+#include "structVetor.h"
 
 #define TAMANHO_MAX_MATRIZ 25
 
@@ -24,6 +24,18 @@ void imprimeMatrizDeAdjascencias(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATR
     }
 }
 
+void imprimeVetor(int *vetor) {
+    if (vetor == NULL) {
+        printf("Vetor vazio.\n");
+        return;
+    }
+
+    for (int i = 0; vetor[i] != -1 && vetor[i] != NULL; i++) {
+        printf("%d ", vetor[i]);
+    }
+    printf("\n");
+}
+
 void normalizaMatriz(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int sizeMatriz) {
     for (int i = 0; i < sizeMatriz; i++) {
         for (int j = 0; j < sizeMatriz; j++) {
@@ -34,26 +46,89 @@ void normalizaMatriz(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int siz
     }
 }
 
-void appendInt(int **vetor, int valor) {
-    *vetor = (int *) realloc(*vetor, sizeof(*vetor) + 1);
-    (*vetor)[sizeof(*vetor)] = valor;
+void appendInt(Vetor **vetor, int *valores) 
+{
+    int tamanhoVetor = (*vetor)->length;
+    int qtdValores = len(valores);
+
+    printf("tamanhoVetor: %d\n", tamanhoVetor);
+    printf("qtdValores: %d\n", qtdValores);
+
+    if (tamanhoVetor == 0 && qtdValores > 1) 
+    {
+        (*vetor)->itens = (int *) malloc(sizeof(int) * qtdValores);
+        (*vetor)->length++;
+        for (int i = 0; i < qtdValores; i++) 
+        {
+            (*vetor)[i] = valores[i];
+        }
+    } 
+    else if (tamanhoVetor > 0 && qtdValores > 1) 
+    {
+        (*vetor)->itens = (int *) realloc(*vetor, sizeof(int) * (tamanhoVetor + qtdValores));
+        (*vetor)->length += qtdValores;
+        for (int i = 0; i < qtdValores; i++) 
+        {
+            if (!contido(valores[i], *vector))
+            {
+                (*vetor)[tamanhoVetor + i] = valores[i];   
+            }
+        }
+    }
+    // else if (tamanhoVetor == 0 && qtdValores == 1) 
+    // {
+    //     *vetor = (int *) malloc(sizeof(int));
+    //     (*vetor)[0] = valores[0];
+    // }
+
+    // for (int i = 0; i < qtdValores; i++) 
+    // {
+    //     tamanhoVetor = len(*vetor);
+    //     for (int j = 0; j < tamanhoVetor; j++) 
+    //     {
+    //         if (valores[j] == (*vetor)[i])
+    //         {
+    //             continue ;
+    //         }
+
+    //         // Caso o valor não esteja no vetor, adiciona
+    //         *vetor = (int *) realloc(*vetor, tamanhoVetor * sizeof(int) + 1);
+    //         (*vetor)[tamanhoVetor - 1] = valores[i];
+    //     }
+    // }
+
+    return ;
 }
 
 int len(int *vetor) {
     int length = 0;
 
     if (vetor == NULL) {
-        printf("vetor == NULL ou vetor == 0\n");
         return 0;
     }
-    else if (vetor[0] == -1) {
+    else if (vetor[0] <= -1) {
         return 0;
     }
 
     for (int i = 0; vetor[i] != -1 && vetor[i] != NULL; i++) {
+        printf("vetor[%d]: %d\n", i, vetor[i]);
         length++;
     }
     return length;
+}
+
+bool contido(int valor, Vetor *vetor) {
+    if (vetor == NULL) {
+        return false;
+    }
+
+    for (int i = 0; i < vetor->length; i++) {
+        if (vetor->itens[i] == valor) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool passouPelaPilha(int *pilha, int idVertice) {
@@ -92,21 +167,10 @@ void adicionaFilhosNaPilha(int **pilha, int *filhos)
             continue;
         }
         else {
-            appendInt(pilha, filhos[i]);
+            pilhaPush(pilha, filhos[i]);
         }
     }
 }
 
-void adicionaNoPassaramPelaPilha(int **idsPassaramPelaPilha, int *filhos) 
-{
-    if (filhos == NULL) {
-        return;
-    }
-
-    for (int i = 0; filhos[i] != -1; i++) 
-    {
-        appendInt(idsPassaramPelaPilha, filhos[i]);
-    }
-}
 
 #endif

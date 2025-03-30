@@ -45,7 +45,7 @@ bool incluirVertice(int matriz[][TAMANHO_MAX_MATRIZ]) {
 
 int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergente, int vIncidente) 
 {
-    int *caminhoIds = NULL, *idsPassaramPelaPilha, *filhosAux;
+    Vetor *caminhoIds = NULL, *idsPassaramPelaPilha = NULL, *filhosAux = NULL;
     int *pilha, aux;
     bool continuaFluxo = true;
 
@@ -55,8 +55,22 @@ int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergen
         return NULL;
     }
 
+    printf("1 ------------------\n");
     pilha = pilhaInicializar(NULL);
+    printf("2 ------------------\n");
     pilhaPush(&pilha, vEmergente);
+    printf("3 ------------------\n");
+    appendInt(&idsPassaramPelaPilha, &vEmergente);
+
+    printf("4 ------------------\n");
+    imprimeVetor(idsPassaramPelaPilha);
+
+    return 1;
+
+    printf("5 ------------------\n");
+
+    imprimePilha(pilha);
+    printf("6 ------------------\n");
 
     while(continuaFluxo) 
     {
@@ -67,22 +81,19 @@ int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergen
             continuaFluxo = false;
             break;
         }
-
-        if (passouPelaPilha(pilha, aux)) 
-        {
-            continue;
-        }
+        printf("Vértice atual: %d\n", aux);
 
         if (aux == vIncidente) 
         {
             printf("Caminho encontrado!\n");
-            appendInt(&caminhoIds, aux);
+            appendInt(&caminhoIds, &aux);
             continuaFluxo = false;
             break;
         }
         else 
         {
-            appendInt(&caminhoIds, aux);
+            printf("Adicionando vértice %d ao caminho\n", aux);
+            appendInt(&caminhoIds, &aux);
         }
 
         filhosAux = buscaFilhos(grafo, aux);
@@ -96,27 +107,21 @@ int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergen
         else
         {
             // Adiciona os filhos na pilha
+            printf("Adicionando filhos do vértice %d na pilha\n", aux);
             adicionaFilhosNaPilha(&pilha, filhosAux);
-            adicionaNoPassaramPelaPilha(&idsPassaramPelaPilha, filhosAux);
+
+            // Adiciona os filhos na lista de ids que passaram pela pilha
+            printf("Adicionando filhos do vértice %d na lista de ids que passaram pela pilha\n", aux);
+            appendInt(&idsPassaramPelaPilha, filhosAux);
         }
 
+        printf("imprimeVetor(filhosAux)");
+        imprimeVetor(filhosAux);
+
+        printf("imprimeVetor(idsPassaramPelaPilha)");
+        imprimeVetor(idsPassaramPelaPilha);
+        break;
     }
-
-    printf("3 ------------------\n");
-    caminhoIds = buscaFilhos(grafo, vEmergente);
-
-    printf("Impressão da pilha:\n");
-    imprimePilha(pilha);
-
-    printf("Impressão dos filhos:\n");
-    for (int i = 0; caminhoIds[i] != -1; i++) {
-        printf("V%d ", caminhoIds[i]);
-    }
-
-    // while(conituaFluxo) {
-
-    // }
-
 }
 
 int *buscaFilhos(int grafo[][TAMANHO_MAX_MATRIZ], int vertice) 
