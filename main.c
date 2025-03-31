@@ -2,11 +2,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "lib/bucaLargura.h"
-#include "lib/structVertice.h"
-#include "lib/pilha.h"
-#include "lib/menu.h"
+#include "lib/structVetor.h"
+#include "lib/util.h"
 #include "lib/manipulaMatriz.h"
+#include "lib/menu.h"
 
 #define TAMANHO_MAX_MATRIZ 25
 

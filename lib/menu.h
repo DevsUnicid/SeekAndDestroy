@@ -4,11 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "structVertice.h"
+#include "structVetor.h"
 
 #define TAMANHO_MATRIZ 5
 #define TAMANHO_PADRAO 80;
 
+// Assinatura de funções
+void imprimeRepeticao(char padrao, int qtd);
+void espacamentoVertical(char padrao, int tamanhoPadrao);
+void menuInicial(bool comCabecalho, bool apagaTudo);
+
+// Funções
 void imprimeRepeticao(char padrao, int qtd) {
     for (int cont = 0; cont < qtd; cont++) {
         printf("%c", padrao);
@@ -81,7 +87,7 @@ void menuInicial(bool comCabecalho, bool apagaTudo) {
     // Opção 0 - Sair do programa
     printf("\n");
     imprimeRepeticao('*', (tamanhoPadrao - 56)/2);
-    printf("         -1 - Sair do programa                          ");
+    printf("         0 - Sair do programa                          ");
     imprimeRepeticao('*', (tamanhoPadrao - 56)/2);
 
     // Pula linha no menu (espaçamento vert ical)
@@ -94,8 +100,5 @@ void menuInicial(bool comCabecalho, bool apagaTudo) {
     printf("\n");
 }
 
-void menuArestas() {
-
-}
 
 #endif

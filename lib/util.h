@@ -5,9 +5,22 @@
 #include <stdlib.h>
 
 #include "structVetor.h"
+#include "pilha.h"
 
 #define TAMANHO_MAX_MATRIZ 25
 
+// Assinatura de funções
+void imprimeMatrizDeAdjascencias(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int qtdVertices);
+void imprimeVetor(Vetor *vetor);
+void normalizaMatriz(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int sizeMatriz);
+void appendInt(Vetor **vetor, int valor);
+int len(int *vetor);
+bool contido(int valor, Vetor *vetor);
+bool passouPelaPilha(int idVertice, Vetor *idsPassaramPelaPilha) ;
+void limpaVetor(int **vetor);
+void adicionaFilhosNaPilha(int **pilha, Vetor *filhos, Vetor *idsPassaramPelaPilha) ;
+
+//Funções 
 void imprimeMatrizDeAdjascencias(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int qtdVertices) {
     printf("\n     ");
     for (int j = 0; j < qtdVertices; j++) {
@@ -24,14 +37,16 @@ void imprimeMatrizDeAdjascencias(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATR
     }
 }
 
-void imprimeVetor(int *vetor) {
+void imprimeVetor(Vetor *vetor) {
     if (vetor == NULL) {
         printf("Vetor vazio.\n");
         return;
     }
 
-    for (int i = 0; vetor[i] != -1 && vetor[i] != NULL; i++) {
-        printf("%d ", vetor[i]);
+    printf("vetor->itens[0]: %d\n", vetor->itens[0]);
+    printf("vetor->length: %d\n", vetor->length);
+    for (int i = 0; i < vetor->length; i++) {
+        printf("%d ", vetor->itens[i]);
     }
     printf("\n");
 }
@@ -46,58 +61,70 @@ void normalizaMatriz(int matriz[TAMANHO_MAX_MATRIZ][TAMANHO_MAX_MATRIZ], int siz
     }
 }
 
-void appendInt(Vetor **vetor, int *valores) 
-{
-    int tamanhoVetor = (*vetor)->length;
-    int qtdValores = len(valores);
+Vetor *iniciaVetor(int valor) {
+    Vetor *vetor = (Vetor *) malloc(sizeof(Vetor));
 
-    printf("tamanhoVetor: %d\n", tamanhoVetor);
-    printf("qtdValores: %d\n", qtdValores);
-
-    if (tamanhoVetor == 0 && qtdValores > 1) 
+    if (valor == -1) 
     {
-        (*vetor)->itens = (int *) malloc(sizeof(int) * qtdValores);
-        (*vetor)->length++;
-        for (int i = 0; i < qtdValores; i++) 
-        {
-            (*vetor)[i] = valores[i];
-        }
-    } 
-    else if (tamanhoVetor > 0 && qtdValores > 1) 
-    {
-        (*vetor)->itens = (int *) realloc(*vetor, sizeof(int) * (tamanhoVetor + qtdValores));
-        (*vetor)->length += qtdValores;
-        for (int i = 0; i < qtdValores; i++) 
-        {
-            if (!contido(valores[i], *vector))
-            {
-                (*vetor)[tamanhoVetor + i] = valores[i];   
-            }
-        }
+        vetor->length = 0;
+        vetor->itens = NULL;
     }
-    // else if (tamanhoVetor == 0 && qtdValores == 1) 
-    // {
-    //     *vetor = (int *) malloc(sizeof(int));
-    //     (*vetor)[0] = valores[0];
-    // }
+    else 
+    {
+        vetor->length = 1;
+        vetor->itens = (int *) malloc(sizeof(int));
+        vetor->itens[0] = valor;
+    }
 
-    // for (int i = 0; i < qtdValores; i++) 
-    // {
-    //     tamanhoVetor = len(*vetor);
-    //     for (int j = 0; j < tamanhoVetor; j++) 
-    //     {
-    //         if (valores[j] == (*vetor)[i])
-    //         {
-    //             continue ;
-    //         }
+    return vetor;
+}
 
-    //         // Caso o valor não esteja no vetor, adiciona
-    //         *vetor = (int *) realloc(*vetor, tamanhoVetor * sizeof(int) + 1);
-    //         (*vetor)[tamanhoVetor - 1] = valores[i];
-    //     }
-    // }
+void appendInt(Vetor **vetor, int valor) 
+{
+    int tamanhoVetor;
+
+    if (*vetor == NULL) 
+    {
+        *vetor = (Vetor *) malloc(sizeof(Vetor));
+        (*vetor)->length = 0;
+        (*vetor)->itens = NULL;
+    }
+    tamanhoVetor = (*vetor)->length;
+
+    if (tamanhoVetor == 0) 
+    {
+        (*vetor)->itens = (int *) malloc(sizeof(int) * 2);
+        (*vetor)->length = 1;
+        (*vetor)->itens[0] = valor;
+        (*vetor)->itens[1] = -1;
+    }
+    else 
+    {
+        (*vetor)->itens = (int *) realloc((*vetor)->itens, sizeof(int) * (tamanhoVetor + 1));
+        (*vetor)->length++;
+        (*vetor)->itens[tamanhoVetor] = valor;
+        (*vetor)->itens[tamanhoVetor + 1] = -1;
+    }
 
     return ;
+}
+
+void  appendListInt(Vetor **vetor, Vetor *valores) 
+{
+    if (*vetor == NULL) 
+    {
+        *vetor = (Vetor *) malloc(sizeof(Vetor));
+        (*vetor)->length = 0;
+        (*vetor)->itens = NULL;
+    }
+
+    for (int i = 0; i < valores->length; i++) 
+    {
+        if (!contido(valores->itens[i], *vetor)) 
+        {
+            appendInt(vetor, valores->itens[i]);
+        }
+    }
 }
 
 int len(int *vetor) {
@@ -110,8 +137,7 @@ int len(int *vetor) {
         return 0;
     }
 
-    for (int i = 0; vetor[i] != -1 && vetor[i] != NULL; i++) {
-        printf("vetor[%d]: %d\n", i, vetor[i]);
+    for (int i = 0; vetor[i] > -1 && vetor[i] != NULL && vetor[i] < 10000; i++) {
         length++;
     }
     return length;
@@ -131,13 +157,14 @@ bool contido(int valor, Vetor *vetor) {
     return false;
 }
 
-bool passouPelaPilha(int *pilha, int idVertice) {
-    if (pilha == NULL) {
+bool passouPelaPilha(int idVertice, Vetor *idsPassaramPelaPilha) 
+{
+    if (idsPassaramPelaPilha == NULL) {
         return false;
     }
 
-    for (int i = 0; i < len(pilha); i++) {
-        if (pilha[i] == idVertice) {
+    for (int i = 0; i < idsPassaramPelaPilha->length; i++) {
+        if (idsPassaramPelaPilha->itens[i] == idVertice) {
             return true;
         }
     }
@@ -153,24 +180,29 @@ void limpaVetor(int **vetor)
     }
 
     vEmergente = *vetor[0];
-    appendInt(vetor, vEmergente);
+    *vetor = iniciaVetor(vEmergente);
 }
 
-void adicionaFilhosNaPilha(int **pilha, int *filhos) 
+void adicionaFilhosNaPilha(int **pilha, Vetor *filhos, Vetor *idsPassaramPelaPilha) 
 {
-    if (filhos == NULL) {
+    if (filhos->length == 0) {
         return;
     }
 
-    for (int i = 0; filhos[i] != -1; i++) {
-        if (passouPelaPilha(*pilha, filhos[i])) {
+    for (int i = 0; i < filhos->length; i++) {
+        if (passouPelaPilha(filhos->itens[i], idsPassaramPelaPilha)) {
             continue;
-        }
-        else {
-            pilhaPush(pilha, filhos[i]);
+        } else {
+            pilhaPush(pilha, filhos->itens[i]);
         }
     }
 }
 
+int *list(int valor) {
+    int *vetorFinal = (int *) malloc(sizeof(int) * 2);
+    vetorFinal[0] = valor;
+    vetorFinal[1] = -1;
+    return vetorFinal; 
+}
 
 #endif

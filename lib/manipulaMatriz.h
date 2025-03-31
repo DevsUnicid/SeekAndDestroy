@@ -5,12 +5,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "util.h"
 #include "pilha.h"
 
 #define TAMANHO_MAX_MATRIZ 25
 
-// Definição de funções
-int *buscaFilhos(int grafo[][TAMANHO_MAX_MATRIZ], int vertice);
+// Assinatura de funções
+bool insereConexao(int matriz[][TAMANHO_MAX_MATRIZ], int idPai, int idConexao);
+bool incluirVertice(int matriz[][TAMANHO_MAX_MATRIZ]);
+int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergente, int vIncidente);
+Vetor *buscaFilhos(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vertice) ;
 
 // Funções
 bool insereConexao(int matriz[][TAMANHO_MAX_MATRIZ], int idPai, int idConexao) {
@@ -45,8 +49,9 @@ bool incluirVertice(int matriz[][TAMANHO_MAX_MATRIZ]) {
 
 int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergente, int vIncidente) 
 {
-    Vetor *caminhoIds = NULL, *idsPassaramPelaPilha = NULL, *filhosAux = NULL;
-    int *pilha, aux;
+    Vetor *caminhoIds = NULL, *idsPassaramPelaPilha = NULL, *filhosAux;
+    Pilha *pilha;
+    int aux;
     bool continuaFluxo = true;
 
     if (vEmergente == vIncidente) 
@@ -55,103 +60,91 @@ int *buscaCaminho(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vEmergen
         return NULL;
     }
 
-    printf("1 ------------------\n");
     pilha = pilhaInicializar(NULL);
-    printf("2 ------------------\n");
     pilhaPush(&pilha, vEmergente);
-    printf("3 ------------------\n");
-    appendInt(&idsPassaramPelaPilha, &vEmergente);
-
-    printf("4 ------------------\n");
-    imprimeVetor(idsPassaramPelaPilha);
-
-    return 1;
-
-    printf("5 ------------------\n");
-
-    imprimePilha(pilha);
-    printf("6 ------------------\n");
+    idsPassaramPelaPilha = iniciaVetor(vEmergente);
+    filhosAux = iniciaVetor(-1);
 
     while(continuaFluxo) 
     {
         aux = pilhaPop(pilha);
+
         if (aux == -1) 
         {
-            printf("Pilha vazia.\n");
             continuaFluxo = false;
             break;
         }
-        printf("Vértice atual: %d\n", aux);
 
         if (aux == vIncidente) 
         {
-            printf("Caminho encontrado!\n");
-            appendInt(&caminhoIds, &aux);
+            appendInt(&caminhoIds, aux);
             continuaFluxo = false;
             break;
         }
         else 
         {
-            printf("Adicionando vértice %d ao caminho\n", aux);
-            appendInt(&caminhoIds, &aux);
+            appendInt(&caminhoIds, aux);
         }
 
-        filhosAux = buscaFilhos(grafo, aux);
-        if (len(filhosAux) == 0) 
+        filhosAux = buscaFilhos(grafo, qtdVertices, aux);
+
+        if (filhosAux->length == 0) 
         {
-            // Caso o vértice não tenha filhos, chegamos ao fim desse caminho
             limpaVetor(&filhosAux);
             limpaVetor(&caminhoIds);
             continue;
         }
         else
         {
-            // Adiciona os filhos na pilha
-            printf("Adicionando filhos do vértice %d na pilha\n", aux);
-            adicionaFilhosNaPilha(&pilha, filhosAux);
-
-            // Adiciona os filhos na lista de ids que passaram pela pilha
-            printf("Adicionando filhos do vértice %d na lista de ids que passaram pela pilha\n", aux);
-            appendInt(&idsPassaramPelaPilha, filhosAux);
+            adicionaFilhosNaPilha(&pilha, filhosAux, idsPassaramPelaPilha);
+            appendListInt(&idsPassaramPelaPilha, filhosAux);
         }
-
-        printf("imprimeVetor(filhosAux)");
-        imprimeVetor(filhosAux);
-
-        printf("imprimeVetor(idsPassaramPelaPilha)");
-        imprimeVetor(idsPassaramPelaPilha);
-        break;
     }
+
+    for (int i = 0; i < caminhoIds->length; i++) 
+    {
+        printf("%d ", caminhoIds->itens[i]);
+    }
+    printf("\n");
 }
 
-int *buscaFilhos(int grafo[][TAMANHO_MAX_MATRIZ], int vertice) 
+Vetor *buscaFilhos(int grafo[][TAMANHO_MAX_MATRIZ], int qtdVertices, int vertice) 
 {
-    int *filhos, qtdFilhos = 0;
+    int qtdFilhos = 0;
     int linha = vertice - 1;
 
-    for (int j = 0; j < TAMANHO_MAX_MATRIZ; j++) 
+    Vetor **filhos = (Vetor **) malloc(sizeof(Vetor *));
+    *filhos = (Vetor *) malloc(sizeof(Vetor));
+    (*filhos)->length = 0;
+    (*filhos)->itens = NULL;
+
+    for (int j = 0; j < qtdVertices; j++) 
     {
+        qtdFilhos = (*filhos)->length;
+
         if (grafo[linha][j] == 1) 
         {
             if (qtdFilhos == 0)
             {
-                filhos = (int *) malloc(sizeof(int));
-                filhos[qtdFilhos] = j + 1;
+                (*filhos)->itens = (int *) malloc(sizeof(int));
+                (*filhos)->length = 1;
+                (*filhos)->itens[qtdFilhos] = j + 1;
             }
             else 
             {
-                filhos = (int *) realloc(filhos, qtdFilhos * sizeof(int) + 1);
-                filhos[qtdFilhos] = j + 1;
+                (*filhos)->itens = (int *) realloc((*filhos)->itens, (qtdFilhos + 1) * sizeof(int));
+                (*filhos)->length++;
+                (*filhos)->itens[qtdFilhos] = j + 1;
             }
 
             qtdFilhos++;
         }
     }
 
-    filhos = (int *) realloc(filhos, qtdFilhos * sizeof(int) + 1);
-    filhos[qtdFilhos] = -1;
+    (*filhos)->itens = (int *) realloc((*filhos)->itens, sizeof(int) * (1 + qtdFilhos));
+    (*filhos)->itens[qtdFilhos] = -1;
 
-    return filhos;
+    return *filhos;
 }
 
 #endif
